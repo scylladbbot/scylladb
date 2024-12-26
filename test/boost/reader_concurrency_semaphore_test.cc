@@ -465,7 +465,7 @@ SEASTAR_TEST_CASE(reader_restriction_file_tracking) {
         }
 
         // All units should have been deposited back.
-        REQUIRE_EVENTUALLY_EQUAL(4 * 1024, semaphore.available_resources().memory);
+        REQUIRE_EVENTUALLY_EQUAL<ssize_t>([&] { return semaphore.available_resources().memory; }, 4 * 1024);
     });
 }
 
@@ -509,7 +509,7 @@ SEASTAR_TEST_CASE(reader_concurrency_semaphore_timeout) {
        }
 
         // All units should have been deposited back.
-        REQUIRE_EVENTUALLY_EQUAL(replica::new_reader_base_cost, semaphore.available_resources().memory);
+        REQUIRE_EVENTUALLY_EQUAL<ssize_t>([&] { return semaphore.available_resources().memory; }, replica::new_reader_base_cost);
     });
 }
 
@@ -541,7 +541,7 @@ SEASTAR_TEST_CASE(reader_concurrency_semaphore_max_queue_length) {
             }
         }
 
-        REQUIRE_EVENTUALLY_EQUAL(replica::new_reader_base_cost, semaphore.available_resources().memory);
+        REQUIRE_EVENTUALLY_EQUAL<ssize_t>([&] { return semaphore.available_resources().memory; }, replica::new_reader_base_cost);
     });
 }
 
@@ -1091,7 +1091,13 @@ SEASTAR_THREAD_TEST_CASE(test_reader_concurrency_semaphore_evict_inactive_reads_
 
     // Marking p2 as awaits should now allow p3 to be admitted by evicting p1
     rd2.mark_as_awaits();
+<<<<<<< HEAD
     BOOST_REQUIRE_EQUAL(semaphore.get_stats().waiters, 0);
+||||||| parent of b509644972 (test: lib: eventually: make *EVENTUALLY_EQUAL inline functions)
+    REQUIRE_EVENTUALLY_EQUAL(semaphore.get_stats().waiters, 0);
+=======
+    REQUIRE_EVENTUALLY_EQUAL<uint64_t>([&] { return semaphore.get_stats().waiters; }, 0);
+>>>>>>> b509644972 (test: lib: eventually: make *EVENTUALLY_EQUAL inline functions)
     BOOST_REQUIRE_EQUAL(semaphore.get_stats().need_cpu_permits, 1);
     BOOST_REQUIRE_EQUAL(semaphore.get_stats().awaits_permits, 1);
     BOOST_REQUIRE_EQUAL(semaphore.get_stats().inactive_reads, 0);
@@ -1136,7 +1142,13 @@ SEASTAR_THREAD_TEST_CASE(test_reader_concurrency_semaphore_set_resources) {
     BOOST_REQUIRE_EQUAL(semaphore.get_stats().waiters, 1);
 
     semaphore.set_resources({4, 4 * 1024});
+<<<<<<< HEAD
     BOOST_REQUIRE_EQUAL(semaphore.get_stats().waiters, 0);
+||||||| parent of b509644972 (test: lib: eventually: make *EVENTUALLY_EQUAL inline functions)
+    REQUIRE_EVENTUALLY_EQUAL(semaphore.get_stats().waiters, 0);
+=======
+    REQUIRE_EVENTUALLY_EQUAL<uint64_t>([&] { return semaphore.get_stats().waiters; }, 0);
+>>>>>>> b509644972 (test: lib: eventually: make *EVENTUALLY_EQUAL inline functions)
     BOOST_REQUIRE_EQUAL(semaphore.available_resources(), reader_resources(1, 1024));
     BOOST_REQUIRE_EQUAL(semaphore.initial_resources(), reader_resources(4, 4 * 1024));
     permit3_fut.get();
@@ -1914,7 +1926,13 @@ SEASTAR_THREAD_TEST_CASE(test_reader_concurrency_semaphore_necessary_evicting) {
         BOOST_REQUIRE_EQUAL(semaphore.get_stats().inactive_reads, 1);
 
         ncpu_guard.reset();
+<<<<<<< HEAD
         BOOST_REQUIRE(!handle);
+||||||| parent of b509644972 (test: lib: eventually: make *EVENTUALLY_EQUAL inline functions)
+        REQUIRE_EVENTUALLY_EQUAL(bool(handle), false);
+=======
+        REQUIRE_EVENTUALLY_EQUAL<bool>([&] { return bool(handle); }, false);
+>>>>>>> b509644972 (test: lib: eventually: make *EVENTUALLY_EQUAL inline functions)
         BOOST_REQUIRE_EQUAL(semaphore.get_stats().inactive_reads, 0);
         BOOST_REQUIRE_EQUAL(semaphore.get_stats().permit_based_evictions, ++evicted_reads);
 
@@ -1943,8 +1961,14 @@ SEASTAR_THREAD_TEST_CASE(test_reader_concurrency_semaphore_necessary_evicting) {
         BOOST_REQUIRE_EQUAL(semaphore.get_stats().inactive_reads, 1);
 
         ncpu_guard.reset();
+<<<<<<< HEAD
         thread::yield(); // allow debug builds to schedule the fiber evicting the reads again
         BOOST_REQUIRE(!handle);
+||||||| parent of b509644972 (test: lib: eventually: make *EVENTUALLY_EQUAL inline functions)
+        REQUIRE_EVENTUALLY_EQUAL(bool(handle), false);
+=======
+        REQUIRE_EVENTUALLY_EQUAL<bool>([&] { return bool(handle); }, false);
+>>>>>>> b509644972 (test: lib: eventually: make *EVENTUALLY_EQUAL inline functions)
         BOOST_REQUIRE_EQUAL(semaphore.get_stats().inactive_reads, 0);
         BOOST_REQUIRE_EQUAL(semaphore.get_stats().permit_based_evictions, ++evicted_reads);
 
