@@ -24,7 +24,7 @@
 #include "service/qos/raft_service_level_distributed_data_accessor.hh"
 #include "db/view/view_building_state.hh"
 #include "tasks/task_manager.hh"
-#include "utils/assert.hh"
+// (assert.hh not needed directly here)
 #include "utils/build_id.hh"
 #include "utils/only_on_shard0.hh"
 #include "supervisor.hh"
@@ -2581,7 +2581,8 @@ int main(int ac, char** av) {
         {"perf-load-balancing", perf::scylla_tablet_load_balancing_main, "run tablet load balancer tests"},
         {"perf-simple-query", perf::scylla_simple_query_main, "run performance tests by sending simple queries to this server"},
         {"perf-sstable", perf::scylla_sstable_main, "run performance tests by exercising sstable related operations on this server"},
-        {"perf-alternator", perf::alternator(scylla_main, &after_init_func), "run performance tests on full alternator stack"}
+        {"perf-alternator", perf::alternator(scylla_main, &after_init_func), "run performance tests on full alternator stack"},
+        {"perf-cql-raw", perf::cql_raw(scylla_main, &after_init_func), "run performance tests using raw CQL protocol frames"}
     };
 
     main_func_type main_func;
