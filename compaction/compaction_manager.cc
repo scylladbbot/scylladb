@@ -1861,10 +1861,27 @@ protected:
         // it into the correct compaction group. Similar approach is done in off-strategy compaction for
         // sstables that don't require reshape and are ready to be moved across sets.
         compaction_completion_desc desc { .old_sstables = {sst}, .new_sstables = {sst} };
+<<<<<<< HEAD
         return _compacting_table->on_compaction_completion(std::move(desc), sstables::offstrategy::no).then([] {
             // It's fine to return empty results (zeroed stats) as compaction was bypassed.
             return compaction_result{};
         });
+||||||| parent of b4c9e4991c (compaction: fix split bypass racing with regular compaction selection)
+        co_await _compacting_table->on_compaction_completion(std::move(desc), sstables::offstrategy::no);
+        // It's fine to return empty results (zeroed stats) as compaction was bypassed.
+        co_return compaction_result{};
+=======
+        // Must hold sstable_set_lock while calling on_compaction_completion, because it
+        // mutates the sstable set (moves sstables between compaction groups). Otherwise
+        // a concurrent regular compaction's snapshot+filter+registration (which IS
+        // protected by this lock) can capture sstables that are about to be moved out
+        // from under it — causing "Unable to remove input SSTable" on completion.
+        auto& cs = _cm.get_compaction_state(_compacting_table);
+        auto units = co_await get_units(cs.sstable_set_lock, 1);
+        co_await _compacting_table->on_compaction_completion(std::move(desc), sstables::offstrategy::no);
+        // It's fine to return empty results (zeroed stats) as compaction was bypassed.
+        co_return compaction_result{};
+>>>>>>> b4c9e4991c (compaction: fix split bypass racing with regular compaction selection)
     }
 
     future<compaction_result> rewrite_sstable(const sstables::shared_sstable sst) override {
